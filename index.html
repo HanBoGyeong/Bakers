@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BAKERS - 빵집 리뷰 커뮤니티</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "Noto Sans KR", sans-serif;
+        background: #f8f8f0;
+        color: #292929;
+      }
+
+      /* 헤더 */
+      header {
+        background: #f8f8f0;
+        padding: 20px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .header-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 18px;
+        font-weight: bold;
+        color: #2c5fb3;
+        letter-spacing: 3px;
+        cursor: pointer;
+        max-height: 50px;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+        gap: 40px;
+      }
+
+      nav a {
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        transition: color 0.3s;
+        cursor: pointer;
+      }
+
+      nav a:hover {
+        color: #2c5fb3;
+      }
+
+      .nav-with-search {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .search-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .search-icon {
+        cursor: pointer;
+        color: #2c5fb3;
+        font-size: 20px;
+        transition: color 0.3s;
+        display: flex;
+        align-items: center;
+        padding: 5px;
+      }
+
+      .search-icon:hover {
+        color: #1a4080;
+      }
+
+      .search-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        padding: 6px 15px;
+        margin-left: 10px;
+      }
+
+      .search-input-wrapper.active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .search-input {
+        border: none;
+        outline: none;
+        font-size: 14px;
+        width: 150px;
+        background: transparent;
+        color: #333;
+      }
+
+      .search-input::placeholder {
+        color: #999;
+      }
+
+      .search-close {
+        cursor: pointer;
+        color: #999;
+        font-size: 16px;
+        display: none;
+        align-items: center;
+        transition: color 0.3s;
+        line-height: 1;
+      }
+
+      .search-close:hover {
+        color: #2c5fb3;
+      }
+
+      .header-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn {
+        padding: 8px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-size: 13px;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn-login {
+        background: transparent;
+        color: #2c5fb3;
+        border: 1px solid #2c5fb3;
+      }
+
+      .btn-signup {
+        background: #4cd4a0;
+        color: white;
+      }
+
+      .btn-login:hover {
+        background: #2c5fb3;
+        color: white;
+      }
+
+      .btn-signup:hover {
+        background: #3bc490;
+      }
+
+      /* 페이지 컨테이너 */
+      .page {
+        display: none;
+      }
+
+      .page.active {
+        display: block;
+      }
+
+      /* 홈 페이지 */
+      .hero {
+        padding: 80px 40px 50px;
+        text-align: left;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .hero h1 {
+        font-size: 28px;
+        color: #2c5fb3;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        font-weight: 600;
+      }
+
+      .hero p {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 5px;
+        line-height: 1.6;
+      }
+
+      /* 갤러리 섹션 */
+      .gallery-section {
+        padding: 40px 40px 80px;
+      }
+
+      .gallery-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .gallery-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .gallery-header h2 {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 10px;
+        font-weight: normal;
+      }
+
+      .gallery-header .highlight {
+        background: #fff4e6;
+        color: #ff9800;
+        padding: 8px 20px;
+        border-radius: 20px;
+        display: inline-block;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 2px;
+        margin-bottom: 40px;
+      }
+
+      .gallery-item {
+        position: relative;
+        aspect-ratio: 1;
+        background: #d8d8d8;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .item-overlay {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        color: #2c5fb3;
+        font-size: 11px;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.3s;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 5px 10px;
+        border-radius: 5px;
+      }
+
+      .gallery-item:hover .item-overlay {
+        opacity: 1;
+      }
+
+      .btn-more {
+        display: block;
+        width: fit-content;
+        margin: 0 auto;
+        padding: 12px 40px;
+        background: transparent;
+        color: #2c5fb3;
+        border: 1px solid #2c5fb3;
+        border-radius: 25px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 500;
+      }
+
+      .btn-more:hover {
+        background: #2c5fb3;
+        color: white;
+      }
+
+      /* CTA 섹션 */
+      .cta-section {
+        padding: 60px 40px;
+        background: #f5f3ed;
+        text-align: center;
+      }
+
+      .cta-section h2 {
+        font-size: 20px;
+        color: #333;
+        line-height: 1.8;
+        font-weight: 400;
+      }
+
+      .cta-section .highlight-text {
+        color: #2c5fb3;
+        font-weight: 600;
+      }
+
+      .cta-section .sub-text {
+        color: #ff9800;
+        font-weight: 600;
+      }
+
+      /* 푸터 */
+      footer {
+        background: #1a3a7a;
+        color: white;
+        padding: 50px 40px 30px;
+      }
+
+      .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 60px;
+        margin-bottom: 40px;
+      }
+
+      .footer-brand h3 {
+        font-size: 20px;
+        letter-spacing: 3px;
+        margin-bottom: 8px;
+      }
+
+      .footer-brand p {
+        font-size: 10px;
+        opacity: 0.7;
+        letter-spacing: 1px;
+      }
+
+      .footer-column h4 {
+        font-size: 12px;
+        margin-bottom: 15px;
+        opacity: 0.8;
+      }
+
+      .footer-column ul {
+        list-style: none;
+      }
+
+      .footer-column a {
+        color: white;
+        text-decoration: none;
+        font-size: 12px;
+        line-height: 2.2;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+      }
+
+      .footer-column a:hover {
+        opacity: 1;
+      }
+
+      .footer-bottom {
+        text-align: center;
+        padding-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 11px;
+        opacity: 0.6;
+      }
+
+      /* 다른 페이지들 */
+      .content-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 80px 40px;
+        min-height: 60vh;
+      }
+
+      .content-page h1 {
+        font-size: 36px;
+        color: #2c5fb3;
+        margin-bottom: 30px;
+      }
+
+      .content-page p {
+        font-size: 16px;
+        line-height: 1.8;
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      @media (max-width: 1024px) {
+        .gallery-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header-container {
+          flex-direction: column;
+          gap: 15px;
+          padding: 0 20px;
+        }
+
+        nav ul {
+          gap: 20px;
+        }
+
+        .hero {
+          padding: 60px 20px 40px;
+        }
+
+        .hero h1 {
+          font-size: 22px;
+        }
+
+        .gallery-section {
+          padding: 30px 20px 60px;
+        }
+
+        .gallery-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .footer-container {
+          grid-template-columns: 1fr;
+          gap: 30px;
+          text-align: center;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .gallery-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 헤더 -->
+    <header>
+      <div class="header-container">
+        <!-- ✅ 수정: 로고에 id 추가 -->
+        <img src="BAKERS.png" class="logo" id="bakersLogo" alt="BAKERS" />
+        <div class="nav-with-search">
+          <nav>
+            <ul>
+              <!-- ✅ 수정: 추천빵집 메뉴에 id 추가 -->
+              <li><a id="recommendLink">추천빵집</a></li>
+              <li><a onclick="showPage('reviews')">내 주변</a></li>
+              <li><a onclick="showPage('about')">커뮤니티</a></li>
+            </ul>
+          </nav>
+          <div class="search-container">
+            <div class="search-icon" id="searchIcon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </div>
+            <div class="search-input-wrapper" id="searchInputWrapper">
+              <input
+                type="text"
+                class="search-input"
+                id="searchInput"
+                placeholder="빵집을 검색하세요..."
+              />
+              <div class="search-close" id="searchClose">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="header-buttons">
+          <button class="btn btn-login" onclick="showPage('login')">
+            로그인
+          </button>
+          <button class="btn btn-signup" onclick="showPage('signup')">
+            회원가입
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 홈 페이지 (메인 랜딩 페이지) -->
+    <div id="home" class="page active">
+      <section class="hero">
+        <h1>
+          Join to access our<br />growing library of premium<br />design
+          resources
+        </h1>
+        <p>당신이 방문한 빵집의 소중한 순간을</p>
+        <p>모든 빵덕과 함께 공유할 준비가 되셨나요?</p>
+      </section>
+
+      <section class="gallery-section">
+        <div class="gallery-container">
+          <div class="gallery-header">
+            <h2>당신의 베이커리 경험을 공유하세요</h2>
+            <div class="highlight">Share your bakery moments</div>
+          </div>
+
+          <div class="gallery-grid">
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80"
+                alt="빵집"
+              />
+              <div class="item-overlay">빵굼 베이커리</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80"
+                alt="빵"
+              />
+              <div class="item-overlay">성심당</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1568471173238-64ed8e1fc0fe?w=400&q=80"
+                alt="크루아상"
+              />
+              <div class="item-overlay">크루아상 전문점</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&q=80"
+                alt="바게트"
+              />
+              <div class="item-overlay">프랑스 베이커리</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?w=400&q=80"
+                alt="빵집"
+              />
+              <div class="item-overlay">파리바게뜨</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=400&q=80"
+                alt="베이커리"
+              />
+              <div class="item-overlay">뚜레쥬르</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=400&q=80"
+                alt="도넛"
+              />
+              <div class="item-overlay">던킨 도넛</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=400&q=80"
+                alt="케이크"
+              />
+              <div class="item-overlay">카페 베이커리</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1557925923-cd4648e211a0?w=400&q=80"
+                alt="빵"
+              />
+              <div class="item-overlay">동네 빵집</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=400&q=80"
+                alt="빵집"
+              />
+              <div class="item-overlay">브레드 스토리</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400&q=80"
+                alt="베이글"
+              />
+              <div class="item-overlay">베이글 카페</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=400&q=80"
+                alt="빵"
+              />
+              <div class="item-overlay">홈메이드 베이커리</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1550617931-e17a7b70dce2?w=400&q=80"
+                alt="제과점"
+              />
+              <div class="item-overlay">아티장 베이커리</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1560180477-7e7a0b6e6896?w=400&q=80"
+                alt="빵"
+              />
+              <div class="item-overlay">소금빵 전문점</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1549903072-7e6e0bedb7fb?w=400&q=80"
+                alt="베이커리"
+              />
+              <div class="item-overlay">스위트 베이커리</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&q=80"
+                alt="빵집"
+              />
+              <div class="item-overlay">빵 공방</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1584278302340-3b486e679aeb?w=400&q=80"
+                alt="빵"
+              />
+              <div class="item-overlay">골목 베이커리</div>
+            </div>
+            <div class="gallery-item">
+              <img
+                src="https://images.unsplash.com/photo-1562007908-17c67e878c88?w=400&q=80"
+                alt="제빵"
+              />
+              <div class="item-overlay">제빵왕 김탁구</div>
+            </div>
+          </div>
+
+          <button class="btn-more" onclick="showPage('reviews')">
+            더 많은 빵집보기
+          </button>
+        </div>
+      </section>
+
+      <section class="cta-section">
+        <h2>
+          지금 바로 시작하세요<br />
+          당신의 <span class="highlight-text">빵집 경험</span>을 공유하고 다른
+          사람들과 <span class="sub-text">소통</span>하세요
+        </h2>
+      </section>
+    </div>
+
+    <!-- ✅ 추가: 추천빵집 페이지 -->
+    <div id="recommend" class="page">
+      <div class="content-page">
+        <h1>추천 빵집</h1>
+        <p>BAKERS가 엄선한 최고의 빵집들을 소개합니다.</p>
+        <p>지역별, 메뉴별로 특별한 빵집들을 만나보세요.</p>
+        <p>빵덕들이 극찬한 맛집 리스트를 확인하세요!</p>
+      </div>
+    </div>
+
+    <!-- 리뷰 페이지 -->
+    <div id="reviews" class="page">
+      <div class="content-page">
+        <h1>리뷰 목록</h1>
+        <p>사용자들이 작성한 빵집 리뷰를 확인하세요.</p>
+        <p>별점, 사진, 후기를 통해 다양한 빵집 정보를 얻을 수 있습니다.</p>
+        <p>마음에 드는 빵집을 발견하셨다면 직접 방문해보세요!</p>
+      </div>
+    </div>
+
+    <!-- 지도보기 페이지 -->
+    <div id="about" class="page">
+      <div class="content-page">
+        <h1>지도에서 빵집 찾기</h1>
+        <p>지도를 통해 주변 빵집을 쉽게 찾아보세요.</p>
+        <p>위치 기반으로 가까운 빵집을 추천해드립니다.</p>
+        <p>별점과 리뷰를 확인하고 최고의 빵집을 발견하세요!</p>
+      </div>
+    </div>
+
+    <!-- 로그인 페이지 -->
+    <div id="login" class="page">
+      <div class="content-page">
+        <h1>로그인</h1>
+        <p>BAKERS 회원으로 로그인하여 더 많은 기능을 이용하세요.</p>
+        <p>리뷰 작성, 댓글, 좋아요 등 다양한 활동이 가능합니다.</p>
+      </div>
+    </div>
+
+    <!-- 회원가입 페이지 -->
+    <div id="signup" class="page">
+      <div class="content-page">
+        <h1>회원가입</h1>
+        <p>BAKERS의 새로운 회원이 되어주세요.</p>
+        <p>간단한 가입 절차로 빵집 리뷰 커뮤니티에 참여하실 수 있습니다.</p>
+        <p>지금 바로 가입하고 당신의 빵집 이야기를 공유하세요!</p>
+      </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer>
+      <div class="footer-container">
+        <div class="footer-brand">
+          <h3>BAKERS</h3>
+          <p>DESIGN YOUR BREAD STORY</p>
+        </div>
+        <div class="footer-column">
+          <h4>서비스</h4>
+          <ul>
+            <li><a href="#" onclick="showPage('reviews')">리뷰보기</a></li>
+            <li><a href="#" onclick="showPage('signup')">리뷰쓰기</a></li>
+            <li><a href="#" onclick="showPage('about')">빵집찾기</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>회사</h4>
+          <ul>
+            <li><a href="#">소개</a></li>
+            <li><a href="#">문의하기</a></li>
+            <li><a href="#">이용약관</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>커뮤니티</h4>
+          <ul>
+            <li><a href="#">인스타그램</a></li>
+            <li><a href="#">페이스북</a></li>
+            <li><a href="#">블로그</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">© 2024 Breadable. All rights reserved.</div>
+    </footer>
+
+    <script>
+      function showPage(pageId) {
+        // 모든 페이지 숨기기
+        const pages = document.querySelectorAll(".page");
+        pages.forEach((page) => {
+          page.classList.remove("active");
+        });
+
+        // 선택된 페이지 보이기
+        const selectedPage = document.getElementById(pageId);
+        if (selectedPage) {
+          selectedPage.classList.add("active");
+        }
+
+        // 페이지 상단으로 스크롤
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+
+      // ✅ 수정: DOMContentLoaded 이벤트에서 네비게이션 이벤트 등록
+      document.addEventListener("DOMContentLoaded", function () {
+        // 1️⃣ BAKERS 로고 클릭 이벤트 - home 페이지로 이동
+        const bakersLogo = document.getElementById("bakersLogo");
+        if (bakersLogo) {
+          bakersLogo.addEventListener("click", function () {
+            showPage("home");
+          });
+        }
+
+        // 2️⃣ 추천빵집 메뉴 클릭 이벤트 - recommend 페이지로 이동
+        const recommendLink = document.getElementById("recommendLink");
+        if (recommendLink) {
+          recommendLink.addEventListener("click", function () {
+            showPage("recommend");
+          });
+        }
+
+        // 3️⃣ 검색 기능
+        const searchIcon = document.getElementById("searchIcon");
+
+        const searchInput = document.getElementById("searchInput");
+
+        // 돋보기 아이콘 클릭 - 검색 입력창에 포커스
+        if (searchIcon) {
+          searchIcon.addEventListener("click", function () {
+            searchInput.focus();
+          });
+        }
+
+        // 검색 입력 시 Enter 키 처리
+        if (searchInput) {
+          searchInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              const query = searchInput.value.trim();
+              if (query) {
+                alert(`"${query}" 검색 결과를 찾고 있습니다...`);
+                // 여기에 실제 검색 기능을 추가할 수 있습니다
+              }
+            }
+          });
+        }
+
+        // 갤러리 아이템 클릭 시 리뷰 페이지로 이동
+        const galleryItems = document.querySelectorAll(".gallery-item");
+        galleryItems.forEach((item) => {
+          item.addEventListener("click", function () {
+            showPage("reviews");
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
