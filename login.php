@@ -54,7 +54,7 @@
         }
 
         .form-group input {
-            width: 500px;
+            width: 400px;
             height: 48px;
             padding: 0 16px;
             border: 1px solid #dee2e6;
