@@ -19,7 +19,7 @@ define('ROOT_URL', 'http://localhost/bakers');
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'bakers_db');
+define('DB_NAME', 'bakers');
 
 // 데이터베이스 연결
 try {

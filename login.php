@@ -1,225 +1,124 @@
+<?php
+session_start();
+
+
+
+// DB 연결
+$host = "localhost";
+$user = "root";
+$pass = "qhrud145@";
+$dbname = "bogyeong";
+
+$conn = new mysqli($host, $user, $pass, $dbname);
+if ($conn->connect_error) {
+    die("<script>alert('데이터베이스 연결 실패: " . addslashes($conn->connect_error) . "'); history.back();</script>");
+}
+$conn->set_charset("utf8mb4");
+
+// POST 방식 로그인 처리
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $user_id = trim($_POST['user_id'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if ($user_id === '' || $password === '') {
+        die("<script>alert('아이디와 비밀번호를 모두 입력해주세요.'); history.back();</script>");
+    }
+
+    $stmt = $conn->prepare("SELECT id, user_id, password, nickname, level, status FROM members WHERE user_id = ?");
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        die("<script>alert('존재하지 않는 아이디입니다.'); history.back();</script>");
+    }
+
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    if ($user['status'] !== 'active') {
+        die("<script>alert('비활성화된 계정입니다. 관리자에게 문의해주세요.'); history.back();</script>");
+    }
+
+    if (!password_verify($password, $user['password'])) {
+        die("<script>alert('비밀번호가 올바르지 않습니다.'); history.back();</script>");
+    }
+
+    $_SESSION['logged_in'] = true;
+    $_SESSION['user_id'] = $user['user_id'];
+    $_SESSION['nickname'] = $user['nickname'];
+    $_SESSION['level'] = $user['level'];
+
+    $update = $conn->prepare("UPDATE members SET last_login = NOW() WHERE id = ?");
+    $update->bind_param("i", $user['id']);
+    $update->execute();
+    $update->close();
+
+    $conn->close();
+
+    echo "<script>alert('로그인 성공! 환영합니다, " . addslashes($user['nickname']) . "님 😊'); location.href='index.php';</script>";
+    exit;
+}
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BAKERS - 로그인</title>
     <link rel="stylesheet" href="main.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
-            background:rgb(255, 255, 255);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-       
-        /* 로그인 컨테이너 */
-        .login-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 20px;
-        }
-
-       
-
-        .login-title {
-            font-size: 26px;
-            font-weight: 600;
-            color: #1e3a8a;
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        /* 폼 */
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #495057;
-            margin-bottom: 8px;
-        }
-
-        .form-group input {
-            width: 400px;
-            height: 48px;
-            padding: 0 16px;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-        }
-
-        .form-links {
-            text-align: right;
-            margin-bottom: 20px;
-            font-size: 13px;
-        }
-
-        .form-links a {
-            color: #868e96;
-            text-decoration: none;
-            margin-left: 10px;
-        }
-
-        .btn-login-submit {
-            width: 100%;
-            height: 48px;
-            background: #e9ecef;
-            color: #868e96;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 30px;
-        }
-
-        .social-divider {
-            text-align: center;
-            margin: 30px 0;
-            color: #868e96;
-            font-size: 13px;
-        }
-
-        .social-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .social-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
-        }
-
-        .social-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        /* 푸터 */
-        .footer {
-            background: #1e3a8a;
-            color: white;
-            padding: 40px 20px 20px;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 30px;
-        }
-
-        .footer-brand h3 {
-            font-size: 18px;
-            letter-spacing: 2px;
-        }
-
-        .footer-brand p {
-            font-size: 11px;
-            opacity: 0.8;
-        }
-
-        .footer-column h4 {
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
-
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column a {
-            color: white;
-            font-size: 12px;
-            opacity: 0.7;
-            line-height: 2;
-            cursor: pointer;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 11px;
-            opacity: 0.6;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .footer-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-        }
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif; background: #fff; min-height: 100vh; display: flex; flex-direction: column;}
+        .login-container {flex: 1; display: flex; align-items: center; justify-content: center; padding: 60px 20px;}
+        .login-box {width: 420px;}
+        .login-title {font-size: 26px; font-weight: 600; color: #1e3a8a; text-align: center; margin-bottom: 50px;}
+        .form-group {margin-bottom: 24px;}
+        .form-group label {display: block; font-size: 14px; font-weight: 500; color: #495057; margin-bottom: 8px;}
+        .form-group input {width: 100%; height: 48px; padding: 0 16px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 14px;}
+        .form-group input:focus {outline: none; border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);}
+        .form-links {text-align: right; margin-bottom: 20px; font-size: 13px;}
+        .form-links a {color: #868e96; text-decoration: none; margin-left: 10px;}
+        .btn-login-submit {width: 100%; height: 48px; background: #1e3a8a; color: #fff; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 30px;}
+        .social-divider {text-align: center; margin: 30px 0; color: #868e96; font-size: 13px;}
+        .social-buttons {display: flex; justify-content: center; gap: 15px; margin-bottom: 30px;}
+        .social-btn {width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;}
+        .social-btn:hover {transform: translateY(-2px);}
     </style>
-  </head>
-
-  <body>
-    <!-- 헤더 -->
+</head>
+<body>
     <header class="header login">
-      <?php include "header.php"; ?>
+        <?php include "header.php"; ?>
     </header>
 
-  <!-- 로그인 -->
-  <div class="login-container">
+    <div class="login-container">
         <div class="login-box">
             <h1 class="login-title">로그인</h1>
 
-            <form>
+            <form action="" method="POST">
                 <div class="form-group">
                     <label>아이디</label>
-                    <input type="text" placeholder="아이디를 입력해주세요.">
+                    <input type="text" name="user_id" placeholder="아이디를 입력해주세요.">
                 </div>
 
                 <div class="form-group">
                     <label>비밀번호</label>
-                    <input type="password" placeholder="비밀번호를 입력해주세요.">
+                    <input type="password" name="password" placeholder="비밀번호를 입력해주세요.">
                 </div>
 
                 <div class="form-links">
-                    <a>아이디·비밀번호 찾기</a>
+                    <a href="find_id.php">아이디·비밀번호 찾기</a>
                     <span style="color: #dee2e6;">|</span>
-                    <a>회원가입</a>
+                    <a href="signup.php">회원가입</a>
                 </div>
 
-                <button type="button" class="btn-login-submit" onclick="alert('로그인 기능 데모')">로그인</button>
+                <button type="submit" class="btn-login-submit">로그인</button>
             </form>
 
             <div class="social-divider">
-                이용하실려면 로그인해주세요.
+                SNS 로그인도 가능합니다.
             </div>
 
             <div class="social-buttons">
@@ -250,9 +149,8 @@
         </div>
     </div>
 
-    <!-- 푸터 -->
     <footer>
-      <?php include "footer.php"; ?>
+        <?php include "footer.php"; ?>
     </footer>
-  </body>
+</body>
 </html>
